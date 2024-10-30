@@ -2,14 +2,13 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from itertools import combinations
-from qiskit import QuantumCircuit
+from qiskit import Aer
 from qiskit.algorithms import QAOA
 from qiskit.algorithms.optimizers import COBYLA
 from qiskit.utils import QuantumInstance
-from qiskit.opflow import PauliSumOp, PauliOp
+from qiskit.opflow import PauliOp
 from qiskit.quantum_info import Pauli
 from qiskit_ibm_runtime import QiskitRuntimeService
-from qiskit_ibm_provider import least_busy
 
 def decode_solution(result, n_cities):
     """
@@ -113,23 +112,6 @@ def create_cost_hamiltonian(distances):
 
     return sum(cost_ops)
 
-def create_tsp_graph():
-    """
-    Create a sample TSP graph with distances and city names.
-    Adjust the number of cities as needed.
-    """
-    # Define cities (keep the number small due to hardware qubit limitations)
-    cities = ['A', 'B', 'C']
-
-    # Define distances
-    distances = [
-        [0, 1, 3],
-        [1, 0, 2],
-        [3, 2, 0]
-    ]
-
-    return distances, cities
-
 def solve_tsp_with_qaoa(create_tsp_graph):
     """
     Solve TSP using QAOA on IBM Quantum hardware.
@@ -137,7 +119,6 @@ def solve_tsp_with_qaoa(create_tsp_graph):
     # Create problem instance
     distances, cities = create_tsp_graph()
     n_cities = len(distances)
-    n_qubits = n_cities * n_cities
 
     # Show initial graph
     print("Initial TSP Graph:")
