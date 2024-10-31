@@ -40,7 +40,27 @@ def create_tsp_graph_5nodes():
     cities = ['A', 'B', 'C', 'D', 'E']
     return distances, cities
 
+
+def create_tsp_graph(n):
+    """
+    Create a TSP problem with n cities labeled V1, V2, .., Vn.
+    """
+    # Generate random distance matrix
+    distance_matrix = np.random.randint(1, 100, size=(n, n))
+    # Make the matrix symmetric and set diagonal to zero
+    distance_matrix = (distance_matrix + distance_matrix.T) / 2
+    np.fill_diagonal(distance_matrix, 0)
+
+    # Generate list of city names
+    city_names = [f"V{i+1}" for i in range(n)]
+
+    return distance_matrix, city_names
+
+
 if __name__ == "__main__":
-    optimal_path, total_distance = solve_tsp_with_qaoa(create_tsp_graph_3nodes)
+    # optimal_path, total_distance = solve_tsp_with_qaoa(create_tsp_graph_3nodes)
     # optimal_path, total_distance = solve_tsp_with_qaoa(create_tsp_graph_4nodes)
     # optimal_path, total_distance = solve_tsp_with_qaoa(create_tsp_graph_5nodes)
+    for n in range(3, 4):
+        distances, cities = create_tsp_graph(n)
+        solve_tsp_with_qaoa(distances, cities)

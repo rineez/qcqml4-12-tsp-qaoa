@@ -112,17 +112,18 @@ def create_cost_hamiltonian(distances):
 
     return sum(cost_ops)
 
-def solve_tsp_with_qaoa(create_tsp_graph):
+def solve_tsp_with_qaoa(distances, cities, useSimulator=True, visualize=False):
     """
     Solve TSP using QAOA on IBM Quantum hardware.
     """
     # Create problem instance
-    distances, cities = create_tsp_graph()
     n_cities = len(distances)
 
-    # Show initial graph
-    print("Initial TSP Graph:")
-    #visualize_graph(distances, cities)
+    print(f"Solving TSP for {n_cities} cities:\n", cities, "\nDistance Matrix:\n", distances)
+    if visualize:
+        # Show initial graph
+        print("Visualizing TSP Graph:")
+        visualize_graph(distances, cities)
 
     # Create Hamiltonian
     cost_hamiltonian = create_cost_hamiltonian(distances)
@@ -131,19 +132,21 @@ def solve_tsp_with_qaoa(create_tsp_graph):
     p = 3  # Number of QAOA layers (keep small for hardware constraints)
     optimizer = COBYLA(maxiter=500)
 
-    # Save the IBM Quantum Experience Credentials only for first run and DO NOT COMMIT the Token in GIT repo!
-    # QiskitRuntimeService.save_account(channel="ibm_quantum", token="<YOUR-TOKEN>", overwrite=True, set_as_default=True)
-    
-    # Load IBMQ account and select backend
-    service = QiskitRuntimeService(channel="ibm_quantum")
-    # Get the least busy backend with enough qubits
-    backend = service.least_busy(operational=True, simulator=False, min_num_qubits=16)
-    if not backend:
-        raise Exception("No available backends with enough qubits.")
-    
-    print("Running on current least busy backend:", backend)
+    if useSimulator:
+        backend = Aer.get_backend('qasm_simulator')
+    else:
+            # Save the IBM Quantum Experience Credentials only for first run and DO NOT COMMIT the Token in GIT repo!
+        # QiskitRuntimeService.save_account(channel="ibm_quantum", token="<YOUR-TOKEN>", overwrite=True, set_as_default=True)
+        
+        # Load IBMQ account and select backend
+        service = QiskitRuntimeService(channel="ibm_quantum")
+        # Get the least busy backend with enough qubits
+        backend = service.least_busy(operational=True, simulator=False, min_num_qubits=16)
+        if not backend:
+            raise Exception("No available backends with enough qubits.")
+        
+        print("Running on current least busy backend:", backend)
 
-    # backend = Aer.get_backend('qasm_simulator')
     quantum_instance = QuantumInstance(
         backend,
         shots=4096,
@@ -182,9 +185,10 @@ def solve_tsp_with_qaoa(create_tsp_graph):
         print(f"Optimal path: {' -> '.join(path)}")
         print(f"Total distance: {total_distance}")
 
-        # Show solution
-        print("\nOptimal Path Visualization:")
-        visualize_graph(distances, cities, path)
+        if visualize:
+            # Show solution graph
+            print("\nVisualizing Optimal Path:")
+            visualize_graph(distances, cities, path)
 
         return path, total_distance
 
